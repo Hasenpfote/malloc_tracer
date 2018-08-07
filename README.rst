@@ -1,4 +1,4 @@
-`License <https://github.com/Hasenpfote/%20malloc_tracer/blob/master/LICENSE>`__
+`License <https://github.com/Hasenpfote/malloc_tracer/blob/master/LICENSE>`__
 `Build Status <https://travis-ci.org/Hasenpfote/malloc_tracer>`__
 
 malloc_tracer

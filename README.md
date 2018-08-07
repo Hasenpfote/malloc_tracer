@@ -1,4 +1,4 @@
-[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/Hasenpfote/ malloc_tracer/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/Hasenpfote/malloc_tracer/blob/master/LICENSE)
 [![Build Status](https://travis-ci.org/Hasenpfote/malloc_tracer.svg?branch=master)](https://travis-ci.org/Hasenpfote/malloc_tracer)
 
 malloc_tracer
