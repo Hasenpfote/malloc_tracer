@@ -7,7 +7,7 @@ malloc_tracer
 ## Feature
 
 ## Compatibility
-malloc_tracer works with Python 3.3 or higher.
+malloc_tracer works with Python 3.4 or higher.
 
 ## Dependencies
 
