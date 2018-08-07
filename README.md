@@ -16,6 +16,7 @@ malloc_tracer works with Python 3.4 or higher.
 
 ## Installation
 ```
+pip install malloc-tracer
 ```
 
 ## Usage

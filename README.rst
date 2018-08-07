@@ -26,6 +26,8 @@ Installation
 
 ::
 
+   pip install malloc-tracer
+
 Usage
 -----
 
