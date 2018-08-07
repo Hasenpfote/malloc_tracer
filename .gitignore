@@ -1,0 +1,6 @@
+/__pycache__
+/build
+/dist
+/malloc_tracer.egg-info
+/temp
+/sphinx
