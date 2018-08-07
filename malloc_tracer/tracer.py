@@ -164,6 +164,7 @@ class Tracer(object):
             total += stat.size
 
         print('File "{}"'.format(self._filepath))
+        print('Target', self._obj.__name__ if inspect.isfunction(self._obj) else self._obj.__name__ + '.' + target_name)
         print('Total {}(raw {} B)'.format(bytes_to_hrf(total), total))
         print('Line #    Trace         Line Contents')
         print('=' * (24+80))
