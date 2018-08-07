@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import contextlib
 from unittest import TestCase
+import sys
+sys.path.append('../')
 from malloc_tracer.tracer import *
 
 
