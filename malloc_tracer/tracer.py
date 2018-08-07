@@ -114,25 +114,26 @@ class Tracer(object):
 
     def _take_snapshot(
         self,
-        init_args=None, 
-        target_name=None, 
-        target_args=None, 
+        init_args=None,
+        target_name=None,
+        target_args=None,
         setup='pass'
     ):
+        if target_args is None:
+            target_args = dict()
+
+        # Add modules temporarily.
+        temp = {'SNAPSHOT': None}
+        code = compile(setup, DUMMY_SRC_NAME, 'exec')
+        exec(code, globals(), temp)
+
+        for key in list(temp):
+            if key in globals().keys():
+                temp.pop(key)
+
+        globals().update(temp)
+
         try:
-            if target_args is None:
-                target_args = dict()
-
-            # Add modules temporarily.
-            temp = {'SNAPSHOT': None}
-            code = compile(setup, DUMMY_SRC_NAME, 'exec')
-            exec(code, globals(), temp)
-
-            for key in list(temp):
-                if key in globals().keys():
-                    temp.pop(key)
-
-            globals().update(temp)
             global SNAPSHOT
 
             if inspect.isfunction(self._obj):
