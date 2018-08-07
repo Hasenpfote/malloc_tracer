@@ -122,7 +122,7 @@ class Tracer(object):
             globals().update(temp)
             global SNAPSHOT
 
-            if target_name is None:
+            if inspect.isfunction(self._obj):
                 self._obj(**target_args)
             else:
                 if isinstance(self._obj.__dict__[target_name], staticmethod) \
