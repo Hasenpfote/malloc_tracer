@@ -159,7 +159,8 @@ class Tracer(object):
         init_args=None,
         target_name=None,
         target_args=None,
-        setup='pass'
+        setup='pass',
+        verbose=False
     ):
         if inspect.isfunction(self._obj):
             target_name = self._obj.__name__
@@ -170,7 +171,7 @@ class Tracer(object):
             target_args=target_args,
             setup=setup
         )
-        snapshot = snapshot.filter_traces([Filter(True, DUMMY_SRC_NAME),])
+        snapshot = snapshot.filter_traces([Filter(True, DUMMY_SRC_NAME), ])
         stats = snapshot.statistics('lineno')
 
         total = 0
@@ -187,12 +188,19 @@ class Tracer(object):
         print('Line #    Trace         * Line Contents')
         print('=' * (26+80))
 
-        code_block = self._code_blocks[target_name]
+        code_block = self._code_blocks.get(target_name)
         source_text = ''.join(self._source_lines).strip()
+
         for lineno, line in enumerate(source_text.split(sep='\n'), 1):
+            if verbose:
+                marker = '*' if code_block[0] <= lineno <= code_block[1] else ' '
+            else:
+                if (lineno < code_block[0]) or (lineno > code_block[1]):
+                    continue
+                marker = ' '
+
             size = detected_lines.get(str(lineno))
-            trace = ' '*10 if size is None else bytes_to_hrf(size)
-            marker = '*' if code_block[0] <= lineno <= code_block[1] else ' '
+            trace = ' ' * 10 if size is None else bytes_to_hrf(size)
             print('{lineno:6d}    {trace:10s}    {marker} {contents}'.format(
                 lineno=self._lineno + lineno - 1,
                 trace=trace,
