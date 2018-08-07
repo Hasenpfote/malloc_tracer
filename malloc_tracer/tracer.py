@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import inspect
 import ast
-import types
 import math
 from tracemalloc import start, take_snapshot, stop, Filter
 
@@ -75,6 +74,15 @@ class Transformer(ast.NodeTransformer):
         return ast.fix_missing_locations(node)
 
 
+class CodeBlockCollector(ast.NodeVisitor):
+    '''Collect code blocks.'''
+    def __init__(self):
+        self.code_blocks = dict()
+
+    def visit_FunctionDef(self, node):
+        self.code_blocks[node.name] = (node.lineno, node.body[-1].lineno)
+
+
 class Tracer(object):
 
     def __init__(
@@ -84,10 +92,14 @@ class Tracer(object):
         if not (inspect.isfunction(obj) or inspect.isclass(obj)):
             raise TypeError('The obj must be a function or a class.')
 
-        source_lines, line_no = inspect.getsourcelines(obj)
+        source_lines, lineno = inspect.getsourcelines(obj)
         source_text = ''.join(source_lines).strip()
 
         node = ast.parse(source_text)
+
+        collector = CodeBlockCollector()
+        collector.visit(node)
+
         node = Transformer(result_id='SNAPSHOT').visit(node)
 
         locals_ = {}
@@ -96,8 +108,9 @@ class Tracer(object):
 
         self._obj = locals_[obj.__name__]
         self._source_lines = source_lines
-        self._line_no = line_no
+        self._lineno = lineno
         self._filepath = inspect.getfile(obj)
+        self._code_blocks = collector.code_blocks
 
     def _take_snapshot(
         self,
@@ -147,6 +160,9 @@ class Tracer(object):
         target_args=None,
         setup='pass'
     ):
+        if inspect.isfunction(self._obj):
+            target_name = self._obj.__name__
+
         snapshot = self._take_snapshot(
             init_args=init_args,
             target_name=target_name,
@@ -164,13 +180,21 @@ class Tracer(object):
             total += stat.size
 
         print('File "{}"'.format(self._filepath))
-        print('Target', self._obj.__name__ if inspect.isfunction(self._obj) else self._obj.__name__ + '.' + target_name)
+        prefix = '' if inspect.isfunction(self._obj) else self._obj.__name__ + '.'
+        print('Target', prefix + target_name)
         print('Total {}(raw {} B)'.format(bytes_to_hrf(total), total))
-        print('Line #    Trace         Line Contents')
-        print('=' * (24+80))
+        print('Line #    Trace         * Line Contents')
+        print('=' * (26+80))
 
+        code_block = self._code_blocks[target_name]
         source_text = ''.join(self._source_lines).strip()
-        for line_no, line in enumerate(source_text.split(sep='\n'), 1):
-            size = detected_lines.get(str(line_no))
+        for lineno, line in enumerate(source_text.split(sep='\n'), 1):
+            size = detected_lines.get(str(lineno))
             trace = ' '*10 if size is None else bytes_to_hrf(size)
-            print('{line_no:6d}    {trace:10s}    {contents}'.format(line_no=self._line_no + line_no - 1, trace=trace, contents=line))
+            marker = '*' if code_block[0] <= lineno <= code_block[1] else ' '
+            print('{lineno:6d}    {trace:10s}    {marker} {contents}'.format(
+                lineno=self._lineno + lineno - 1,
+                trace=trace,
+                marker=marker,
+                contents=line
+            ))
