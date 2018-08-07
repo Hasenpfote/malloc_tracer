@@ -37,7 +37,7 @@ if __name__ == '__main__':
     setup(
         name='malloc_tracer',
         version=get_version(),
-        description='',
+        description='This is a debugging tool for tracing malloc that occurs inside a function or class.',
         long_description=_long_description(),
         author='Hasenpfote',
         author_email='Hasenpfote36@gmail.com',

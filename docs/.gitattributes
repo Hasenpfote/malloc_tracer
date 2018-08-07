@@ -1,0 +1,12 @@
+*			text=auto
+*.html 		text eol=lf
+*.css		text eol=lf
+*.js		text eol=lf
+*.inv		binary
+*.gif		binary
+*.png		binary
+*.pickle	binary
+*.doctree	binary
+
+searchindex.js			text eol=crlf
+_static/pygments.css	text eol=crlf
