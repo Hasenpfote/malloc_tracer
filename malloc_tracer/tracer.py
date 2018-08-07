@@ -125,7 +125,8 @@ class Tracer(object):
             if target_name is None:
                 self._obj(**target_args)
             else:
-                if isinstance(self._obj.__dict__[target_name], staticmethod):
+                if isinstance(self._obj.__dict__[target_name], staticmethod) \
+                        or isinstance(self._obj.__dict__[target_name], classmethod):
                     method = getattr(self._obj, target_name)
                 else:
                     instance = self._obj(**init_args)
