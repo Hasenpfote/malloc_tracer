@@ -3,6 +3,7 @@
 import inspect
 import ast
 import math
+import contextlib
 from tracemalloc import start, take_snapshot, stop, Filter
 
 
@@ -23,6 +24,31 @@ def bytes_to_hrf(size):
 
     fmt = '6.0f' if order == 0 else '6.1f'
     return '{0:{1}} {2}'.format(size/(1024**order), fmt, units[order])
+
+
+@contextlib.contextmanager
+def apply_modules_temporarily(setup='pass', extras=None):
+    '''Apply modules temporarily.'''
+    if extras is None:
+        temp = dict()
+    else:
+        temp = extras.copy()
+
+    code = compile(setup, DUMMY_SRC_NAME, 'exec')
+    exec(code, globals(), temp)
+
+    for key in list(temp):
+        if key in globals().keys():
+            temp.pop(key)
+
+    globals().update(temp)
+
+    try:
+        yield
+    finally:
+        # Restore.
+        for key in temp.keys():
+            globals().pop(key, None)
 
 
 class Transformer(ast.NodeTransformer):
@@ -87,24 +113,26 @@ class Tracer(object):
 
     def __init__(
         self,
-        obj
+        obj,
+        setup='pass'
     ):
         if not (inspect.isfunction(obj) or inspect.isclass(obj)):
             raise TypeError('The obj must be a function or a class.')
 
-        source_lines, lineno = inspect.getsourcelines(obj)
-        source_text = ''.join(source_lines).strip()
+        with apply_modules_temporarily(setup=setup):
+            source_lines, lineno = inspect.getsourcelines(obj)
+            source_text = ''.join(source_lines).strip()
 
-        node = ast.parse(source_text)
+            node = ast.parse(source_text)
 
-        collector = CodeBlockCollector()
-        collector.visit(node)
+            collector = CodeBlockCollector()
+            collector.visit(node)
 
-        node = Transformer(result_id='SNAPSHOT').visit(node)
+            node = Transformer(result_id='SNAPSHOT').visit(node)
 
-        locals_ = {}
-        code = compile(node, DUMMY_SRC_NAME, 'exec')
-        exec(code, globals(), locals_)
+            locals_ = {}
+            code = compile(node, DUMMY_SRC_NAME, 'exec')
+            exec(code, globals(), locals_)
 
         self._obj = locals_[obj.__name__]
         self._source_lines = source_lines
@@ -119,22 +147,12 @@ class Tracer(object):
         target_args=None,
         setup='pass'
     ):
-        if target_args is None:
-            target_args = dict()
-
-        # Add modules temporarily.
-        temp = {'SNAPSHOT': None}
-        code = compile(setup, DUMMY_SRC_NAME, 'exec')
-        exec(code, globals(), temp)
-
-        for key in list(temp):
-            if key in globals().keys():
-                temp.pop(key)
-
-        globals().update(temp)
-
-        try:
+        extras = {'SNAPSHOT': None}
+        with apply_modules_temporarily(setup=setup, extras=extras):
             global SNAPSHOT
+
+            if target_args is None:
+                target_args = dict()
 
             if inspect.isfunction(self._obj):
                 self._obj(**target_args)
@@ -143,16 +161,15 @@ class Tracer(object):
                         or isinstance(self._obj.__dict__[target_name], classmethod):
                     method = getattr(self._obj, target_name)
                 else:
+                    if init_args is None:
+                        init_args = dict()
+
                     instance = self._obj(**init_args)
                     method = getattr(instance, target_name)
 
                 method(**target_args)
 
             return SNAPSHOT
-        finally:
-            # Restore.
-            for key in temp.keys():
-                globals().pop(key, None)
 
     def trace(
         self,
