@@ -87,6 +87,19 @@ class TestTracer(TestCase):
                 verbose=True
             )
 
+    def test_function_with_auto_resolve_dependencies(self):
+        tracer = Tracer(
+            function2,
+            enable_auto_resolve=True
+        )
+        with contextlib.redirect_stdout(None):
+            tracer.trace(
+            )
+        with contextlib.redirect_stdout(None):
+            tracer.trace(
+                verbose=True
+            )
+
     def test_method(self):
         tracer = Tracer(Klass)
         with contextlib.redirect_stdout(None):
@@ -115,6 +128,20 @@ class TestTracer(TestCase):
             tracer.trace(
                 target_name='method',
                 setup='import math as mathematics',
+                verbose=True
+            )
+
+    def test_method_with_auto_resolve_dependencies(self):
+        tracer = Tracer(
+            Klass2,
+            enable_auto_resolve=True
+        )
+        with contextlib.redirect_stdout(None):
+            tracer.trace(
+                target_name='method',
+            )
+            tracer.trace(
+                target_name='method',
                 verbose=True
             )
 
@@ -150,7 +177,22 @@ class TestTracer(TestCase):
                 setup='import math as mathematics',
                 verbose=True
             )
-        pass
+
+    def test_static_method_with_auto_resolve_dependencies(self):
+        tracer = Tracer(
+            Klass2,
+            enable_auto_resolve=True
+        )
+        with contextlib.redirect_stdout(None):
+            tracer.trace(
+                target_name='smethod',
+                target_args=dict(base=2, num=100),
+            )
+            tracer.trace(
+                target_name='smethod',
+                target_args=dict(base=2, num=100),
+                verbose=True
+            )
 
     def test_class_method(self):
         tracer = Tracer(Klass)
@@ -182,5 +224,21 @@ class TestTracer(TestCase):
                 target_name='cmethod',
                 target_args=dict(base=1),
                 setup='import math as mathematics',
+                verbose=True,
+            )
+
+    def test_class_method_with_auto_resolve_dependencies(self):
+        tracer = Tracer(
+            Klass2,
+            enable_auto_resolve=True
+        )
+        with contextlib.redirect_stdout(None):
+            tracer.trace(
+                target_name='cmethod',
+                target_args=dict(base=1),
+            )
+            tracer.trace(
+                target_name='cmethod',
+                target_args=dict(base=1),
                 verbose=True,
             )
