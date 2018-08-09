@@ -126,5 +126,40 @@ tracer.trace(
 ```
 ![usage2c](https://raw.githubusercontent.com/Hasenpfote/malloc_tracer/master/docs/usage2c.png)
 
+**Resolve dependencies automatically.**  
+Experimental implementation.  
+Works with 0.5.0 or higher.
+```python
+tracer = Tracer(
+    func,
+    enable_auto_resolve=True
+)
+tracer.trace(
+    target_args=dict(x=1, y=2, z=3),
+)
+```
+
+```python
+tracer = Tracer(
+    Klass,
+    enable_auto_resolve=True
+)
+tracer.trace(
+    init_args=dict(value=1),
+    target_name='method',
+    target_args=dict(x=1)
+)
+```
+
+```python
+tracer = Tracer(
+    Klass,
+    enable_auto_resolve=True
+)
+tracer.trace(
+    target_name='smethod',
+)
+```
+
 ## License
 This software is released under the MIT License, see LICENSE.
