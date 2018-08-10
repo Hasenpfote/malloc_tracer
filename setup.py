@@ -44,7 +44,7 @@ if __name__ == '__main__':
         url='https://github.com/Hasenpfote/malloc_tracer',
         download_url='',
         packages = ['malloc_tracer'],
-        keywords=['debug', ],
+        keywords=['debug', 'debugging-tool', 'tracemalloc'],
         classifiers=[
             'Programming Language :: Python',
             'Programming Language :: Python :: 3',
@@ -53,7 +53,7 @@ if __name__ == '__main__':
             'Programming Language :: Python :: 3.6',
             'License :: OSI Approved :: MIT License',
             'Operating System :: OS Independent',
-            'Development Status :: 1 - Planning',
+            'Development Status :: 3 - Alpha',
             'Environment :: Other Environment',
             'Intended Audience :: Developers',
             'Topic :: Software Development',
