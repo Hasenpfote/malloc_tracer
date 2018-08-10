@@ -43,12 +43,12 @@ def func(x, y, z):
 
     dataset3 = np.empty((3000, ), dtype=np.float64)
     return 2
+```
 
-
+```python
 tracer = Tracer(func)
 tracer.trace(
-    target_args=dict(x=1, y=2, z=3),
-    setup='import numpy as np'
+    target_args=dict(x=1, y=2, z=3)
 )
 ```
 ![usage1](https://raw.githubusercontent.com/Hasenpfote/malloc_tracer/master/docs/usage1.png)
@@ -93,73 +93,34 @@ class Klass(object):
     @classmethod
     def cmethod(cls, var):
         return cls.CONSTANT + var
+```
 
-
-tracer = Tracer(Klass)
-
+```python
+instance = Klass(1)
+tracer = Tracer(instance.method)
 tracer.trace(
-    init_args=dict(value=1),
-    target_name='method',
-    target_args=dict(x=1),
-    setup='import numpy as np'
+    target_args=dict(x=1)
 )
 ```
 ![usage2a](https://raw.githubusercontent.com/Hasenpfote/malloc_tracer/master/docs/usage2a.png)
 
 **Trace a static method.**
 ```python
-# same as above
+tracer = Tracer(Klass.smethod)
 tracer.trace(
-    target_name='smethod',
-    setup='import numpy as np'
+    target_args=dict()
 )
 ```
 ![usage2b](https://raw.githubusercontent.com/Hasenpfote/malloc_tracer/master/docs/usage2b.png)
 
 **Trace a class method.**
 ```python
-# same as above
+tracer = Tracer(Klass.cmethod)
 tracer.trace(
-    target_name='cmethod',
-    target_args=dict(var='world.'),
+    target_args=dict(var='Hello world.')
 )
 ```
 ![usage2c](https://raw.githubusercontent.com/Hasenpfote/malloc_tracer/master/docs/usage2c.png)
-
-**Resolve dependencies automatically.**  
-Experimental implementation.  
-Works with 0.5.0 or higher.
-```python
-tracer = Tracer(
-    func,
-    enable_auto_resolve=True
-)
-tracer.trace(
-    target_args=dict(x=1, y=2, z=3),
-)
-```
-
-```python
-tracer = Tracer(
-    Klass,
-    enable_auto_resolve=True
-)
-tracer.trace(
-    init_args=dict(value=1),
-    target_name='method',
-    target_args=dict(x=1)
-)
-```
-
-```python
-tracer = Tracer(
-    Klass,
-    enable_auto_resolve=True
-)
-tracer.trace(
-    target_name='smethod',
-)
-```
 
 ## License
 This software is released under the MIT License, see LICENSE.

@@ -11,8 +11,7 @@ from malloc_tracer.tracer import *
 def main():
     tracer = Tracer(foo.func)
     tracer.trace(
-        target_args=dict(x=1, y=2, z=3),
-        setup='import numpy as np'
+        target_args=dict(x=1, y=2, z=3)
     )
 
 

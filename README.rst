@@ -57,11 +57,11 @@ Usage
        dataset3 = np.empty((3000, ), dtype=np.float64)
        return 2
 
+.. code:: python
 
    tracer = Tracer(func)
    tracer.trace(
-       target_args=dict(x=1, y=2, z=3),
-       setup='import numpy as np'
+       target_args=dict(x=1, y=2, z=3)
    )
 
 .. figure:: https://raw.githubusercontent.com/Hasenpfote/malloc_tracer/master/docs/usage1.png
@@ -112,14 +112,12 @@ Usage
        def cmethod(cls, var):
            return cls.CONSTANT + var
 
+.. code:: python
 
-   tracer = Tracer(Klass)
-
+   instance = Klass(1)
+   tracer = Tracer(instance.method)
    tracer.trace(
-       init_args=dict(value=1),
-       target_name='method',
-       target_args=dict(x=1),
-       setup='import numpy as np'
+       target_args=dict(x=1)
    )
 
 .. figure:: https://raw.githubusercontent.com/Hasenpfote/malloc_tracer/master/docs/usage2a.png
@@ -131,10 +129,9 @@ Usage
 
 .. code:: python
 
-   # same as above
+   tracer = Tracer(Klass.smethod)
    tracer.trace(
-       target_name='smethod',
-       setup='import numpy as np'
+       target_args=dict()
    )
 
 .. figure:: https://raw.githubusercontent.com/Hasenpfote/malloc_tracer/master/docs/usage2b.png
@@ -146,52 +143,15 @@ Usage
 
 .. code:: python
 
-   # same as above
+   tracer = Tracer(Klass.cmethod)
    tracer.trace(
-       target_name='cmethod',
-       target_args=dict(var='world.'),
+       target_args=dict(var='Hello world.')
    )
 
 .. figure:: https://raw.githubusercontent.com/Hasenpfote/malloc_tracer/master/docs/usage2c.png
    :alt: usage2c
 
    usage2c
-
-| **Resolve dependencies automatically.**
-| Experimental implementation.
-| Works with 0.5.0 or higher.
-
-.. code:: python
-
-   tracer = Tracer(
-       func,
-       enable_auto_resolve=True
-   )
-   tracer.trace(
-       target_args=dict(x=1, y=2, z=3),
-   )
-
-.. code:: python
-
-   tracer = Tracer(
-       Klass,
-       enable_auto_resolve=True
-   )
-   tracer.trace(
-       init_args=dict(value=1),
-       target_name='method',
-       target_args=dict(x=1)
-   )
-
-.. code:: python
-
-   tracer = Tracer(
-       Klass,
-       enable_auto_resolve=True
-   )
-   tracer.trace(
-       target_name='smethod',
-   )
 
 License
 -------
