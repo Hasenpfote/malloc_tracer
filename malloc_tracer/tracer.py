@@ -113,36 +113,33 @@ class CodeBlockCollector(ast.NodeVisitor):
 
 class DependencyCollector(ast.NodeVisitor):
     '''Collect dependencies.'''
-    def __init__(self):
-        self.dependencies = set()
+    def __init__(self, module):
+        self._dependencies = dict()
+        self._module = module
 
-    def visit_Attribute(self, node):
-        if isinstance(node.value, ast.Name):
-            self.dependencies.add(node.value.id)
-        self.generic_visit(node)
+    @property
+    def dependencies(self):
+        from types import MappingProxyType
+        return MappingProxyType(self._dependencies)
 
-    def visit_Call(self, node):
-        if isinstance(node.func, ast.Name):
-            self.dependencies.add(node.func.id)
-        self.generic_visit(node)
+    def visit_Name(self, node):
+        key = node.id
+        if key not in self._dependencies.keys():
+            if key in self._module.__dict__.keys():
+                self._dependencies[key] = self._module.__dict__.get(key)
 
 
 def extract_dependencies(obj):
     '''Extract dependencies.'''
+    module = inspect.getmodule(obj)
+    collector = DependencyCollector(module=module)
+
     source = inspect.getsource(obj)
     source = textwrap.dedent(source)
     node = ast.parse(source)
-
-    collector = DependencyCollector()
     collector.visit(node)
 
-    module = inspect.getmodule(obj)
-    actual_dependencies = dict()
-    for key in collector.dependencies:
-        if key in module.__dict__.keys():
-            actual_dependencies[key] = module.__dict__.get(key)
-
-    return actual_dependencies
+    return collector.dependencies
 
 
 class Tracer(object):
