@@ -5,6 +5,8 @@ import ast
 import math
 import contextlib
 import textwrap
+import os
+import linecache
 from tracemalloc import start, take_snapshot, stop, Filter
 
 
@@ -142,6 +144,40 @@ def extract_dependencies(obj):
     return collector.dependencies
 
 
+class TraceRecord(object):
+
+    def __init__(self, filepath, lineno, size):
+        self._filepath = filepath
+        self._lineno = lineno
+        self._size = size
+
+    @property
+    def filepath(self):
+        return self._filepath
+
+    @property
+    def short_filepath(self):
+        return os.sep.join(self._filepath.split(os.sep)[-2:])
+
+    @property
+    def lineno(self):
+        return self._lineno
+
+    @property
+    def size(self):
+        return self._size
+
+    @property
+    def human_readable_size(self):
+        return bytes_to_hrf(self._size)
+
+    @property
+    def line(self):
+        line = linecache.getline(self._filepath, self._lineno).rstrip()
+        #linecache.clearcache()
+        return line
+
+
 class Tracer(object):
     '''Tracing malloc that occurs inside a function or method.
 
@@ -235,7 +271,8 @@ class Tracer(object):
     def trace(
         self,
         target_args=None,
-        setup='pass'
+        setup='pass',
+        enable_related_traces=False
     ):
         '''Display the trace result.
 
@@ -248,28 +285,63 @@ class Tracer(object):
             target_args=target_args,
             setup=setup
         )
-        snapshot = snapshot.filter_traces([Filter(True, DUMMY_SRC_NAME), ])
-        stats = snapshot.statistics('lineno')
 
-        total = 0
-        detected_lines = dict()
+        traces_records = dict()
+        stats = snapshot.statistics('lineno')
         for stat in stats:
             frame = stat.traceback[0]
-            detected_lines[str(frame.lineno)] = stat.size
-            total += stat.size
+            key = frame.filename
+            traces_record = traces_records.get(key)
+            if traces_record is None:
+                traces_records[key] = dict()
+                traces_record = traces_records.get(key)
 
+            traces_record[frame.lineno] = TraceRecord(
+                filepath=frame.filename,
+                lineno=frame.lineno,
+                size=stat.size
+            )
+
+        # for DUMMY_SRC_NAME.
+        print('<< Target traces >>')
         print('File "{}"'.format(self._filepath))
-        print('Total {}(raw {} B)'.format(bytes_to_hrf(total), total))
         print('Line #    Trace         Line Contents')
         print('=' * (24+80))
 
+        traces_record = traces_records.get(DUMMY_SRC_NAME)
         source_text = ''.join(self._source_lines).rstrip()
-
         for lineno, line in enumerate(source_text.split(sep='\n'), 1):
-            size = detected_lines.get(str(lineno))
-            trace = ' ' * 10 if size is None else bytes_to_hrf(size)
+            if traces_record is None:
+                trace = ' ' * 10
+            else:
+                tr = traces_record.get(lineno)
+                trace = ' ' * 10 if tr is None else tr.human_readable_size
+
             print('{lineno:6d}    {trace:10s}    {contents}'.format(
                 lineno=self._lineno + lineno - 1,
                 trace=trace,
                 contents=line
             ))
+
+        # for others.
+        if enable_related_traces:
+            related_traces_records = {k: v for k, v in traces_records.items() if k != DUMMY_SRC_NAME}
+            if len(related_traces_records) > 0:
+                print()
+                print('<< Related traces >>')
+                print('Line #    Trace         Line Contents')
+                print('=' * (24+80))
+
+                for filepath, traces_record in sorted(related_traces_records.items()):
+                    print('File "{}"'.format(filepath))
+                    for lineno, tr in sorted(traces_record.items()):
+                        print('{lineno:6d}    {trace:10s}    {contents}'.format(
+                            lineno=tr.lineno,
+                            trace=tr.human_readable_size,
+                            contents=tr.line
+                        ))
+
+        # Total allocated size.
+        total = sum(stat.size for stat in stats)
+        print()
+        print('Total allocated size: {} (raw {} B)'.format(bytes_to_hrf(total), total))
