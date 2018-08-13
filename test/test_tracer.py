@@ -67,12 +67,17 @@ class TestTracer(TestCase):
         with contextlib.redirect_stdout(None):
             tracer.trace(
                 target_args=dict(base=2, num=100),
-                setup='import math as mathematics'
+                setup='import math as mathematics',
             )
             tracer.trace(
                 target_args=dict(base=2, num=100),
                 setup='import math as mathematics',
-                enable_related_traces=True
+                related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE
+            )
+            tracer.trace(
+                target_args=dict(base=2, num=100),
+                setup='import math as mathematics',
+                related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER
             )
 
     def test_function_with_default_args(self):
@@ -83,11 +88,15 @@ class TestTracer(TestCase):
         )
         with contextlib.redirect_stdout(None):
             tracer.trace(
-                setup='import math as mathematics'
+                setup='import math as mathematics',
             )
             tracer.trace(
                 setup='import math as mathematics',
-                enable_related_traces=True
+                related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE
+            )
+            tracer.trace(
+                setup='import math as mathematics',
+                related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER
             )
 
     def test_function_with_auto_resolve_dependencies(self):
@@ -97,7 +106,8 @@ class TestTracer(TestCase):
         )
         with contextlib.redirect_stdout(None):
             tracer.trace()
-            tracer.trace(enable_related_traces=True)
+            tracer.trace(related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE)
+            tracer.trace(related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER)
 
     def test_method(self):
         instance = Klass(2, 100)
@@ -111,7 +121,11 @@ class TestTracer(TestCase):
             )
             tracer.trace(
                 setup='import math as mathematics',
-                enable_related_traces=True
+                related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE
+            )
+            tracer.trace(
+                setup='import math as mathematics',
+                related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER
             )
 
     def test_method_with_default_args(self):
@@ -127,7 +141,11 @@ class TestTracer(TestCase):
             )
             tracer.trace(
                 setup='import math as mathematics',
-                enable_related_traces=True
+                related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE
+            )
+            tracer.trace(
+                setup='import math as mathematics',
+                related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER
             )
 
     def test_method_with_auto_resolve_dependencies(self):
@@ -138,7 +156,8 @@ class TestTracer(TestCase):
         )
         with contextlib.redirect_stdout(None):
             tracer.trace()
-            tracer.trace(enable_related_traces=True)
+            tracer.trace(related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE)
+            tracer.trace(related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER)
 
     def test_static_method(self):
         tracer = Tracer(
@@ -153,7 +172,12 @@ class TestTracer(TestCase):
             tracer.trace(
                 target_args=dict(base=2, num=100),
                 setup='import math as mathematics',
-                enable_related_traces=True
+                related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE
+            )
+            tracer.trace(
+                target_args=dict(base=2, num=100),
+                setup='import math as mathematics',
+                related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER
             )
 
     def test_static_method_with_default_args(self):
@@ -170,7 +194,12 @@ class TestTracer(TestCase):
             tracer.trace(
                 target_args=dict(base=2, num=100),
                 setup='import math as mathematics',
-                enable_related_traces=True
+                related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE
+            )
+            tracer.trace(
+                target_args=dict(base=2, num=100),
+                setup='import math as mathematics',
+                related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER
             )
 
     def test_static_method_with_auto_resolve_dependencies(self):
@@ -184,7 +213,11 @@ class TestTracer(TestCase):
             )
             tracer.trace(
                 target_args=dict(base=2, num=100),
-                enable_related_traces=True
+                related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE
+            )
+            tracer.trace(
+                target_args=dict(base=2, num=100),
+                related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER
             )
 
     def test_class_method(self):
@@ -200,7 +233,12 @@ class TestTracer(TestCase):
             tracer.trace(
                 target_args=dict(base=1),
                 setup='import math as mathematics',
-                enable_related_traces=True
+                related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE
+            )
+            tracer.trace(
+                target_args=dict(base=1),
+                setup='import math as mathematics',
+                related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER
             )
 
     def test_class_method_with_default_args(self):
@@ -217,7 +255,12 @@ class TestTracer(TestCase):
             tracer.trace(
                 target_args=dict(base=1),
                 setup='import math as mathematics',
-                enable_related_traces=True
+                related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE
+            )
+            tracer.trace(
+                target_args=dict(base=1),
+                setup='import math as mathematics',
+                related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER
             )
 
     def test_class_method_with_auto_resolve_dependencies(self):
@@ -231,5 +274,9 @@ class TestTracer(TestCase):
             )
             tracer.trace(
                 target_args=dict(base=1),
-                enable_related_traces=True
+                related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE
+            )
+            tracer.trace(
+                target_args=dict(base=1),
+                related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER
             )
