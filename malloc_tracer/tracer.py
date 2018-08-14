@@ -145,38 +145,54 @@ def extract_dependencies(obj):
     return collector.dependencies
 
 
-class TraceRecord(object):
+class TraceRecorder:
 
-    def __init__(self, filepath, lineno, size):
-        self._filepath = filepath
-        self._lineno = lineno
-        self._size = size
+    def __init__(self):
+        self._filepaths = dict()
 
-    @property
-    def filepath(self):
-        return self._filepath
+    def add_trace(self, filepath, lineno, size):
+        filelines = self._filepaths.get(filepath)
+        if filelines is None:
+            self._filepaths[filepath] = dict()
+            filelines = self._filepaths.get(filepath)
 
-    @property
-    def short_filepath(self):
-        return os.sep.join(self._filepath.split(os.sep)[-2:])
+        filelines[lineno] = size
 
-    @property
-    def lineno(self):
-        return self._lineno
+    def list_filepaths(self):
+        return list(self._filepaths.keys())
 
-    @property
-    def size(self):
-        return self._size
+    def list_all_trace(self):
+        '''List all trace.'''
+        traces = list()
+        for filepath, filelines in self._filepaths.items():
+            for lineno, size in filelines.items():
+                traces.append((filepath, lineno, size))
 
-    @property
-    def human_readable_size(self):
-        return bytes_to_hrf(self._size)
+        return traces
 
-    @property
-    def line(self):
-        line = linecache.getline(self._filepath, self._lineno).rstrip()
-        # linecache.clearcache()
-        return line
+    def list_all_related_trace(self):
+        '''List all related-trace.'''
+        traces = list()
+        for filepath, filelines in self._filepaths.items():
+            if filepath == DUMMY_SRC_NAME:
+                continue
+
+            for lineno, size in filelines.items():
+                traces.append((filepath, lineno, size))
+
+        return traces
+
+    def list_traces_for_each_file(self, filepath):
+        '''List traces for each file.'''
+        filelines = self._filepaths.get(filepath)
+        if filelines is None:
+            return list()
+
+        traces = list()
+        for k, v in sorted(filelines.items()):
+            traces.append((k, v))
+
+        return traces
 
 
 class RelatedTracesOutputMode(Enum):
@@ -295,17 +311,11 @@ class Tracer(object):
             setup=setup
         )
 
-        traces_records = dict()
+        recorder = TraceRecorder()
         stats = snapshot.statistics('lineno')
         for stat in stats:
             frame = stat.traceback[0]
-            key = frame.filename
-            traces_record = traces_records.get(key)
-            if traces_record is None:
-                traces_records[key] = dict()
-                traces_record = traces_records.get(key)
-
-            traces_record[frame.lineno] = TraceRecord(
+            recorder.add_trace(
                 filepath=frame.filename,
                 lineno=frame.lineno,
                 size=stat.size
@@ -317,14 +327,16 @@ class Tracer(object):
         print('Line #    Trace         Line Contents')
         print('=' * (24+80))
 
-        traces_record = traces_records.get(DUMMY_SRC_NAME)
+        traces = recorder.list_traces_for_each_file(filepath=DUMMY_SRC_NAME)
+        lineno_to_size = {trace[0]: trace[1] for trace in traces}
+
         source_text = ''.join(self._source_lines).rstrip()
         for lineno, line in enumerate(source_text.split(sep='\n'), 1):
-            if traces_record is None:
-                trace = ' ' * 10
+            if lineno_to_size:
+                size = lineno_to_size.get(lineno)
+                trace = ' ' * 10 if size is None else bytes_to_hrf(size)
             else:
-                tr = traces_record.get(lineno)
-                trace = ' ' * 10 if tr is None else tr.human_readable_size
+                trace = ' ' * 10
 
             print('{lineno:6d}    {trace:10s}    {contents}'.format(
                 lineno=self._lineno + lineno - 1,
@@ -332,12 +344,12 @@ class Tracer(object):
                 contents=line
             ))
 
-        if traces_record is None:
+        if traces:
+            num_lines = len(traces)
+            total = sum(trace[1] for trace in traces)
+        else:
             num_lines = 0
             total = 0
-        else:
-            num_lines = len(traces_record)
-            total = sum(tr.size for tr in traces_record.values())
 
         print('-' * (24 + 80))
         print('{:6d}    {:10s} (raw {} B)'.format(
@@ -351,10 +363,10 @@ class Tracer(object):
             print()
         elif related_traces_output_mode == RelatedTracesOutputMode.FOR_EACH_FILE:
             print()
-            self._display_related_traces_for_each_file(traces_records)
+            self._display_related_traces_for_each_file(recorder)
         elif related_traces_output_mode == RelatedTracesOutputMode.IN_DESCENDING_ORDER:
             print()
-            self._display_related_traces_in_descending_order(traces_records)
+            self._display_related_traces_in_descending_order(recorder)
 
         # Total allocated size.
         total = sum(stat.size for stat in stats)
@@ -363,57 +375,67 @@ class Tracer(object):
             total
         ))
 
-    def _display_related_traces_for_each_file(self, traces_records):
+    @staticmethod
+    def _display_related_traces_for_each_file(recorder):
         '''Displays related traces for each file.'''
-        related_traces_records = {k: v for k, v in traces_records.items() if k != DUMMY_SRC_NAME}
-        for filepath, traces_record in sorted(related_traces_records.items()):
+        filepaths = recorder.list_filepaths()
+        filepaths.sort()
+        try:
+            filepaths.remove(DUMMY_SRC_NAME)
+        except ValueError:
+            pass
+
+        for filepath in filepaths:
             print('<< Related traces >>')
             print('File "{}"'.format(filepath))
             print('Line #    Trace         Line Contents')
             print('=' * (24 + 80))
 
+            traces = recorder.list_traces_for_each_file(filepath=filepath)
+            traces.sort(key=lambda trace: trace[0])
+
             total = 0
-            for lineno, tr in sorted(traces_record.items()):
+            for lineno, size in traces:
                 print('{lineno:6d}    {trace:10s}    {contents}'.format(
-                    lineno=tr.lineno,
-                    trace=tr.human_readable_size,
-                    contents=tr.line
+                    lineno=lineno,
+                    trace=bytes_to_hrf(size),
+                    contents=linecache.getline(filepath, lineno).rstrip()
                 ))
-                total += tr.size
+                total += size
+
+            linecache.clearcache()
 
             print('-' * (24 + 80))
             print('{:6d}    {:10s} (raw {} B)\n'.format(
-                len(traces_record),
+                len(traces),
                 bytes_to_hrf(total),
                 total
             ))
 
-    def _display_related_traces_in_descending_order(self, traces_records):
+    @staticmethod
+    def _display_related_traces_in_descending_order(recorder):
         '''Display related traces in descending order.'''
-        related_trace_records = list()
-        for filepath, traces_record in traces_records.items():
-            if filepath == DUMMY_SRC_NAME:
-                continue
-
-            for _, tr in traces_record.items():
-                related_trace_records.append(tr)
-
-        if not related_trace_records:
+        traces = recorder.list_all_related_trace()
+        if not traces:
             return
+
+        traces.sort(key=lambda trace: (-trace[2], trace[0], trace[1]))
 
         print('<< Related traces >>')
         print('Line #    Trace         Line Contents')
         print('=' * (24 + 80))
 
-        related_trace_records.sort(key=lambda tr: tr.size, reverse=True)
-        for index, related_trace_record in enumerate(related_trace_records, 1):
+        for index, trace in enumerate(traces, 1):
+            filepath, lineno, size = trace
             print('#{} "{}": (raw {} B)'.format(
                 index,
-                related_trace_record.filepath,
-                related_trace_record.size
+                filepath,
+                size
             ))
             print('{lineno:6d}    {trace:10s}    {contents}\n'.format(
-                lineno=related_trace_record.lineno,
-                trace=related_trace_record.human_readable_size,
-                contents=related_trace_record.line
+                lineno=lineno,
+                trace=bytes_to_hrf(size),
+                contents=linecache.getline(filepath, lineno).rstrip()
             ))
+
+        linecache.clearcache()
