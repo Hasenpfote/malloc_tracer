@@ -324,7 +324,7 @@ class Tracer(object):
         # for DUMMY_SRC_NAME.
         print('<< Target traces >>')
         print('File "{}"'.format(self._filepath))
-        print('Line #    Trace         Line Contents')
+        print('Line #    Size          Line Contents')
         print('=' * (24+80))
 
         traces = recorder.list_traces_for_each_file(filepath=DUMMY_SRC_NAME)
@@ -334,13 +334,13 @@ class Tracer(object):
         for lineno, line in enumerate(source_text.split(sep='\n'), 1):
             if lineno_to_size:
                 size = lineno_to_size.get(lineno)
-                trace = ' ' * 10 if size is None else bytes_to_hrf(size)
+                size = ' ' * 10 if size is None else bytes_to_hrf(size)
             else:
-                trace = ' ' * 10
+                size = ' ' * 10
 
-            print('{lineno:6d}    {trace:10s}    {contents}'.format(
+            print('{lineno:6d}    {size:10s}    {contents}'.format(
                 lineno=self._lineno + lineno - 1,
-                trace=trace,
+                size=size,
                 contents=line
             ))
 
@@ -388,7 +388,7 @@ class Tracer(object):
         for filepath in filepaths:
             print('<< Related traces >>')
             print('File "{}"'.format(filepath))
-            print('Line #    Trace         Line Contents')
+            print('Line #    Size          Line Contents')
             print('=' * (24 + 80))
 
             traces = recorder.list_traces_for_each_file(filepath=filepath)
@@ -396,9 +396,9 @@ class Tracer(object):
 
             total = 0
             for lineno, size in traces:
-                print('{lineno:6d}    {trace:10s}    {contents}'.format(
+                print('{lineno:6d}    {size:10s}    {contents}'.format(
                     lineno=lineno,
-                    trace=bytes_to_hrf(size),
+                    size=bytes_to_hrf(size),
                     contents=linecache.getline(filepath, lineno).rstrip()
                 ))
                 total += size
@@ -422,7 +422,7 @@ class Tracer(object):
         traces.sort(key=lambda trace: (-trace[2], trace[0], trace[1]))
 
         print('<< Related traces >>')
-        print('Line #    Trace         Line Contents')
+        print('Line #    Size          Line Contents')
         print('=' * (24 + 80))
 
         for index, trace in enumerate(traces, 1):
@@ -432,9 +432,9 @@ class Tracer(object):
                 filepath,
                 size
             ))
-            print('{lineno:6d}    {trace:10s}    {contents}\n'.format(
+            print('{lineno:6d}    {size:10s}    {contents}\n'.format(
                 lineno=lineno,
-                trace=bytes_to_hrf(size),
+                size=bytes_to_hrf(size),
                 contents=linecache.getline(filepath, lineno).rstrip()
             ))
 
