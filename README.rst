@@ -213,6 +213,72 @@ Usage
 
    usage2c
 
+**Displays related traces for each file.**
+
+.. code:: python
+
+   import numpy as np
+   from malloc_tracer.tracer import *
+
+
+   global_var1 = None
+   global_var2 = None
+
+
+   def func2():
+       global global_var1
+       global global_var2
+       global_var1 = np.empty((1000, ), dtype=np.float64)
+       global_var2 = np.empty((10000, ), dtype=np.float64)
+
+
+   def func(x, y, z):
+       dataset1 = np.empty((100, ), dtype=np.float64)
+       print('x', x)
+       dataset1 = np.empty((1000, ), dtype=np.float64)
+
+       l = [i for i in range(100000)]
+
+       func2()
+
+       if x == 0:
+           dataset4a = np.empty((100000, ), dtype=np.float64)
+           return 0
+       elif x == 1:
+           dataset4b = np.empty((100000, ), dtype=np.float64)
+           return 1
+
+       dataset3 = np.empty((3000, ), dtype=np.float64)
+       return 2
+
+.. code:: python
+
+   tracer = Tracer(func)
+   tracer.trace(
+       target_args=dict(x=1, y=2, z=3),
+       related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE
+   )
+
+.. figure:: https://raw.githubusercontent.com/Hasenpfote/malloc_tracer/master/docs/usage3a.png
+   :alt: usage3a
+
+   usage3a
+
+**Displays related traces in descending order.**
+
+.. code:: python
+
+   tracer = Tracer(func)
+   tracer.trace(
+       target_args=dict(x=1, y=2, z=3),
+       related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER
+   )
+
+.. figure:: https://raw.githubusercontent.com/Hasenpfote/malloc_tracer/master/docs/usage3b.png
+   :alt: usage3b
+
+   usage3b
+
 License
 -------
 
