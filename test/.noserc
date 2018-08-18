@@ -5,3 +5,4 @@ cover-package=malloc_tracer
 cover-erase=1
 cover-html=1
 verbosity=2
+exe=1
