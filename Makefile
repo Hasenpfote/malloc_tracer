@@ -60,12 +60,12 @@ setup: setup.py
 
 .PHONY: upload_to_testpypi
 upload_to_testpypi: setup
-#	$(PIPENV_RUN) twine upload --repository testpypi dist/*
+	$(PIPENV_RUN) twine upload --repository testpypi dist/*
 
 
 .PHONY: upload_to_pypi
 upload_to_pypi: setup
-#	$(PIPENV_RUN) twine upload --repository pypi dist/*
+	$(PIPENV_RUN) twine upload --repository pypi dist/*
 
 
 .PHONY: sphinx-apidoc
