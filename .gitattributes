@@ -3,3 +3,4 @@ LICENSE         text eol=lf
 README          text eol=lf
 Pipfile         text eol=lf
 Pipfile.lock    text eol=lf
+Makefile        text eol=lf
