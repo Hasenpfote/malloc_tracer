@@ -1,6 +1,7 @@
 `License <https://github.com/Hasenpfote/malloc_tracer/blob/master/LICENSE>`__
 `Build Status <https://travis-ci.org/Hasenpfote/malloc_tracer>`__ `PyPI
-version <https://badge.fury.io/py/malloc-tracer>`__ `pyversions <>`__
+version <https://badge.fury.io/py/malloc-tracer>`__
+`Pyversions <https://img.shields.io/pypi/pyversions/malloc-tracer.svg?style=flat>`__
 
 malloc_tracer
 =============
