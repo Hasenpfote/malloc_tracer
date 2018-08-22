@@ -5,11 +5,13 @@ import sys
 sys.path.append(os.getcwd())
 sys.path.append('../')
 import foo
-from malloc_tracer.tracer import *
+import malloc_tracer
 
 
 def main():
-    tracer = Tracer(foo.func)
+    print(malloc_tracer.__version__)
+
+    tracer = malloc_tracer.Tracer(foo.func)
     tracer.trace(
         target_args=dict(x=1, y=2, z=3)
     )

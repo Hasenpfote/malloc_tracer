@@ -5,20 +5,22 @@ import sys
 sys.path.append(os.getcwd())
 sys.path.append('../')
 import bar
-from malloc_tracer.tracer import *
+import malloc_tracer
 
 
 def main():
+    print(malloc_tracer.__version__)
+
     instance = bar.Klass(value=1)
-    tracer = Tracer(instance.method)
+    tracer = malloc_tracer.Tracer(instance.method)
     tracer.trace(
         target_args=dict(x=1),
     )
 
-    tracer = Tracer(bar.Klass.smethod)
+    tracer = malloc_tracer.Tracer(bar.Klass.smethod)
     tracer.trace()
 
-    tracer = Tracer(bar.Klass.cmethod)
+    tracer = malloc_tracer.Tracer(bar.Klass.cmethod)
     tracer.trace(
         target_args=dict(var='world.'),
     )
