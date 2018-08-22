@@ -11,7 +11,7 @@ This is a debugging tool for tracing malloc that occurs inside a function or cla
 
 ```python
 import numpy as np
-from malloc_tracer.tracer import *
+import malloc_tracer
 
 
 def func(x, y, z):
@@ -32,7 +32,7 @@ def func(x, y, z):
     return 2
 
 
-tracer = Tracer(func)
+tracer = malloc_tracer.Tracer(func)
 ```
 
 This is equivalent to the following code.
@@ -85,7 +85,7 @@ pip install malloc-tracer
 **Trace a function.**
 ```python
 import numpy as np
-from malloc_tracer.tracer import *
+import malloc_tracer
 
 
 def func(x, y, z):
@@ -107,7 +107,7 @@ def func(x, y, z):
 ```
 
 ```python
-tracer = Tracer(func)
+tracer = malloc_tracer.Tracer(func)
 tracer.trace(
     target_args=dict(x=1, y=2, z=3)
 )
@@ -117,7 +117,7 @@ tracer.trace(
 **Trace a method.**
 ```python
 import numpy as np
-from malloc_tracer.tracer import *
+import malloc_tracer
 
 
 class Klass(object):
@@ -158,7 +158,7 @@ class Klass(object):
 
 ```python
 instance = Klass(1)
-tracer = Tracer(instance.method)
+tracer = malloc_tracer.Tracer(instance.method)
 tracer.trace(
     target_args=dict(x=1)
 )
@@ -167,7 +167,7 @@ tracer.trace(
 
 **Trace a static method.**
 ```python
-tracer = Tracer(Klass.smethod)
+tracer = malloc_tracer.Tracer(Klass.smethod)
 tracer.trace(
     target_args=dict()
 )
@@ -176,7 +176,7 @@ tracer.trace(
 
 **Trace a class method.**
 ```python
-tracer = Tracer(Klass.cmethod)
+tracer = malloc_tracer.Tracer(Klass.cmethod)
 tracer.trace(
     target_args=dict(var='Hello world.')
 )
@@ -186,7 +186,7 @@ tracer.trace(
 **Displays related traces for each file.**
 ```python
 import numpy as np
-from malloc_tracer.tracer import *
+import malloc_tracer
 
 
 global_var1 = None
@@ -221,23 +221,32 @@ def func(x, y, z):
 ```
 
 ```python
-tracer = Tracer(func)
+tracer = malloc_tracer.Tracer(func)
 tracer.trace(
     target_args=dict(x=1, y=2, z=3),
-    related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE
+    related_traces_output_mode=malloc_tracer.RelatedTracesOutputMode.FOR_EACH_FILE
 )
 ```
 ![usage3a](https://raw.githubusercontent.com/Hasenpfote/malloc_tracer/master/docs/usage3a.png)
 
 **Displays related traces in descending order.**
 ```python
-tracer = Tracer(func)
+tracer = malloc_tracer.Tracer(func)
 tracer.trace(
     target_args=dict(x=1, y=2, z=3),
-    related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER
+    related_traces_output_mode=malloc_tracer.RelatedTracesOutputMode.IN_DESCENDING_ORDER
 )
 ```
 ![usage3b](https://raw.githubusercontent.com/Hasenpfote/malloc_tracer/master/docs/usage3b.png)
+
+**Convenience function.**
+```python
+malloc_tracer.trace(
+    func,
+    target_args=dict(x=1, y=2, z=3),
+    related_traces_output_mode=malloc_tracer.RelatedTracesOutputMode.IN_DESCENDING_ORDER
+)
+```
 
 ## License
 This software is released under the MIT License, see LICENSE.

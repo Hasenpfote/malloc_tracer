@@ -15,7 +15,7 @@ function or class.
 .. code:: python
 
    import numpy as np
-   from malloc_tracer.tracer import *
+   import malloc_tracer
 
 
    def func(x, y, z):
@@ -36,7 +36,7 @@ function or class.
        return 2
 
 
-   tracer = Tracer(func)
+   tracer = malloc_tracer.Tracer(func)
 
 This is equivalent to the following code.
 
@@ -98,7 +98,7 @@ Usage
 .. code:: python
 
    import numpy as np
-   from malloc_tracer.tracer import *
+   import malloc_tracer
 
 
    def func(x, y, z):
@@ -120,7 +120,7 @@ Usage
 
 .. code:: python
 
-   tracer = Tracer(func)
+   tracer = malloc_tracer.Tracer(func)
    tracer.trace(
        target_args=dict(x=1, y=2, z=3)
    )
@@ -135,7 +135,7 @@ Usage
 .. code:: python
 
    import numpy as np
-   from malloc_tracer.tracer import *
+   import malloc_tracer
 
 
    class Klass(object):
@@ -176,7 +176,7 @@ Usage
 .. code:: python
 
    instance = Klass(1)
-   tracer = Tracer(instance.method)
+   tracer = malloc_tracer.Tracer(instance.method)
    tracer.trace(
        target_args=dict(x=1)
    )
@@ -190,7 +190,7 @@ Usage
 
 .. code:: python
 
-   tracer = Tracer(Klass.smethod)
+   tracer = malloc_tracer.Tracer(Klass.smethod)
    tracer.trace(
        target_args=dict()
    )
@@ -204,7 +204,7 @@ Usage
 
 .. code:: python
 
-   tracer = Tracer(Klass.cmethod)
+   tracer = malloc_tracer.Tracer(Klass.cmethod)
    tracer.trace(
        target_args=dict(var='Hello world.')
    )
@@ -219,7 +219,7 @@ Usage
 .. code:: python
 
    import numpy as np
-   from malloc_tracer.tracer import *
+   import malloc_tracer
 
 
    global_var1 = None
@@ -254,10 +254,10 @@ Usage
 
 .. code:: python
 
-   tracer = Tracer(func)
+   tracer = malloc_tracer.Tracer(func)
    tracer.trace(
        target_args=dict(x=1, y=2, z=3),
-       related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE
+       related_traces_output_mode=malloc_tracer.RelatedTracesOutputMode.FOR_EACH_FILE
    )
 
 .. figure:: https://raw.githubusercontent.com/Hasenpfote/malloc_tracer/master/docs/usage3a.png
@@ -269,16 +269,26 @@ Usage
 
 .. code:: python
 
-   tracer = Tracer(func)
+   tracer = malloc_tracer.Tracer(func)
    tracer.trace(
        target_args=dict(x=1, y=2, z=3),
-       related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER
+       related_traces_output_mode=malloc_tracer.RelatedTracesOutputMode.IN_DESCENDING_ORDER
    )
 
 .. figure:: https://raw.githubusercontent.com/Hasenpfote/malloc_tracer/master/docs/usage3b.png
    :alt: usage3b
 
    usage3b
+
+**Convenience function.**
+
+.. code:: python
+
+   malloc_tracer.trace(
+       func,
+       target_args=dict(x=1, y=2, z=3),
+       related_traces_output_mode=malloc_tracer.RelatedTracesOutputMode.IN_DESCENDING_ORDER
+   )
 
 License
 -------
