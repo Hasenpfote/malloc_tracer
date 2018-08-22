@@ -11,7 +11,7 @@ from enum import Enum
 from tracemalloc import start, take_snapshot, stop, Filter
 
 
-__all__ = ['Tracer', 'RelatedTracesOutputMode']
+__all__ = ['Tracer', 'RelatedTracesOutputMode', 'trace']
 
 
 DUMMY_SRC_NAME = '<tracer-src>'
@@ -439,3 +439,25 @@ class Tracer(object):
             ))
 
         linecache.clearcache()
+
+
+def trace(
+    function_or_method,
+    *,
+    target_args=None,
+    enable_auto_resolve=True,
+    ctime_setup='pass',
+    rtime_setup='pass',
+    related_traces_output_mode=RelatedTracesOutputMode.NONE
+):
+    '''Convenience function to create Tracer object and call trace method.'''
+    tracer = Tracer(
+        function_or_method=function_or_method,
+        enable_auto_resolve=enable_auto_resolve,
+        setup=ctime_setup
+    )
+    tracer.trace(
+        target_args=target_args,
+        setup=rtime_setup,
+        related_traces_output_mode=related_traces_output_mode
+    )
