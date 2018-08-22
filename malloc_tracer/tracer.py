@@ -5,7 +5,6 @@ import ast
 import math
 import contextlib
 import textwrap
-import os
 import linecache
 from enum import Enum
 from tracemalloc import start, take_snapshot, stop, Filter
