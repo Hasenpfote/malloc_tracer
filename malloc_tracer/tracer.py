@@ -6,6 +6,7 @@ import math
 import contextlib
 import textwrap
 import linecache
+import fnmatch
 from enum import Enum
 from tracemalloc import start, take_snapshot, stop, Filter
 
@@ -295,7 +296,9 @@ class Tracer(object):
         self,
         target_args=None,
         setup='pass',
-        related_traces_output_mode=RelatedTracesOutputMode.NONE
+        related_traces_output_mode=RelatedTracesOutputMode.NONE,
+        include_patterns=None,
+        exclude_patterns=None
     ):
         '''Display the trace result.
 
@@ -304,16 +307,31 @@ class Tracer(object):
             setup (str): Run-time dependencies.
                 This parameter is ignored if enable_auto_resolve is enabled.
             related_traces_output_mode (:class:`RelatedTracesOutputMode`):
+            include_patterns (set): Specify patterns of file paths to include in the output.
+            exclude_patterns (set): Specify patterns of file paths to exclude in the output.
         '''
         snapshot = self._take_snapshot(
             target_args=target_args,
             setup=setup
         )
 
+        if include_patterns is None:
+            include_patterns = set('*')
+
+        if exclude_patterns is None:
+            exclude_patterns = set()
+
         recorder = TraceRecorder()
         stats = snapshot.statistics('lineno')
         for stat in stats:
             frame = stat.traceback[0]
+
+            if frame.filename != DUMMY_SRC_NAME:
+                if not any(fnmatch.fnmatch(frame.filename, pattern) for pattern in include_patterns):
+                    continue
+                if any(fnmatch.fnmatch(frame.filename, pattern) for pattern in exclude_patterns):
+                    continue
+
             recorder.add_trace(
                 filepath=frame.filename,
                 lineno=frame.lineno,
@@ -447,7 +465,9 @@ def trace(
     enable_auto_resolve=True,
     ctime_setup='pass',
     rtime_setup='pass',
-    related_traces_output_mode=RelatedTracesOutputMode.NONE
+    related_traces_output_mode=RelatedTracesOutputMode.NONE,
+    include_patterns=None,
+    exclude_patterns=None
 ):
     '''Convenience function to create Tracer object and call trace method.'''
     tracer = Tracer(
@@ -458,5 +478,7 @@ def trace(
     tracer.trace(
         target_args=target_args,
         setup=rtime_setup,
-        related_traces_output_mode=related_traces_output_mode
+        related_traces_output_mode=related_traces_output_mode,
+        include_patterns=include_patterns,
+        exclude_patterns=exclude_patterns
     )

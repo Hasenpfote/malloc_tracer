@@ -280,3 +280,23 @@ class TestTracer(TestCase):
                 target_args=dict(base=1),
                 related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER
             )
+
+    def test_include_and_exclude_patterns(self):
+        tracer = Tracer(
+            function,
+        )
+        with contextlib.redirect_stdout(None):
+            tracer.trace(
+                target_args=dict(base=2, num=100),
+                setup='import math as mathematics',
+                related_traces_output_mode=RelatedTracesOutputMode.FOR_EACH_FILE,
+                include_patterns={'*.py'},
+                exclude_patterns={'*/site-packages/*'}
+            )
+            tracer.trace(
+                target_args=dict(base=2, num=100),
+                setup='import math as mathematics',
+                related_traces_output_mode=RelatedTracesOutputMode.IN_DESCENDING_ORDER,
+                include_patterns={'*.py'},
+                exclude_patterns={'*/site-packages/*'}
+            )
