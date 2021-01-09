@@ -1,7 +1,4 @@
-`License <https://github.com/Hasenpfote/malloc_tracer/blob/master/LICENSE>`__
-`Build Status <https://travis-ci.org/Hasenpfote/malloc_tracer>`__ `PyPI
-version <https://badge.fury.io/py/malloc-tracer>`__
-`Pyversions <https://img.shields.io/pypi/pyversions/malloc-tracer.svg?style=flat>`__
+|License| |Build Status| |PyPI version| |Pyversions|
 
 malloc_tracer
 =============
@@ -294,3 +291,12 @@ License
 -------
 
 This software is released under the MIT License, see LICENSE.
+
+.. |License| image:: https://img.shields.io/badge/license-MIT-brightgreen.svg
+   :target: https://github.com/Hasenpfote/malloc_tracer/blob/master/LICENSE
+.. |Build Status| image:: https://travis-ci.com/Hasenpfote/malloc_tracer.svg?branch=master
+   :target: https://travis-ci.com/Hasenpfote/malloc_tracer
+.. |PyPI version| image:: https://badge.fury.io/py/malloc-tracer.svg
+   :target: https://badge.fury.io/py/malloc-tracer
+.. |Pyversions| image:: https://img.shields.io/pypi/pyversions/malloc-tracer.svg?style=flat
+   :target: https://img.shields.io/pypi/pyversions/malloc-tracer.svg?style=flat
