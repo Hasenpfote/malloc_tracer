@@ -1,5 +1,5 @@
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/Hasenpfote/malloc_tracer/blob/master/LICENSE)
-[![Build Status](https://travis-ci.org/Hasenpfote/malloc_tracer.svg?branch=master)](https://travis-ci.org/Hasenpfote/malloc_tracer)
+[![Build Status](https://travis-ci.com/Hasenpfote/malloc_tracer.svg?branch=master)](https://travis-ci.com/Hasenpfote/malloc_tracer)
 [![PyPI version](https://badge.fury.io/py/malloc-tracer.svg)](https://badge.fury.io/py/malloc-tracer)
 [![Pyversions](https://img.shields.io/pypi/pyversions/malloc-tracer.svg?style=flat)](https://img.shields.io/pypi/pyversions/malloc-tracer.svg?style=flat)
 
@@ -7,7 +7,7 @@ malloc_tracer
 =============
 
 ## About
-This is a debugging tool for tracing malloc that occurs inside a function or class.  
+This is a debugging tool for tracing malloc that occurs inside a function or class.
 
 ```python
 import numpy as np
